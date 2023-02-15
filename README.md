@@ -15,14 +15,14 @@
 	 //设置字体大小
 	 BOOL     SetEditFontSize(DWORD fontSize);
    {
-	 //设置颜色参数
-    SET_EDITBACKCOLOR           0x0                    //编辑框背景颜色\n
- SET_EDITFONTCOLOR              0x1                    //编辑框字体颜色\n
- SET_EDITHIGHLICOLOR            0x2                    //字体高亮颜色\n
- SET_EDITDIGITALCOLOR           0x3                    //数字颜色\n
- SET_EDITNOTECOLOR              0x4                    //注释颜色
- SET_EDITLINEBACKGCOLOR         0x5                    //行号背景颜色
- SET_EDITLINECOLOR              0x6                    //行号颜色
+	 //设置颜色参数;
+    SET_EDITBACKCOLOR           0x0                    //编辑框背景颜色;
+ SET_EDITFONTCOLOR              0x1                    //编辑框字体颜色;
+ SET_EDITHIGHLICOLOR            0x2                    //字体高亮颜色;
+ SET_EDITDIGITALCOLOR           0x3                    //数字颜色;
+ SET_EDITNOTECOLOR              0x4                    //注释颜色;
+ SET_EDITLINEBACKGCOLOR         0x5                    //行号背景颜色;
+ SET_EDITLINECOLOR              0x6                    //行号颜色;
 	 BOOL     SetEditColor(DWORD  dwStyle, COLORREF clr);
    }
 	 //
