@@ -16,20 +16,36 @@
 	 BOOL     SetEditFontSize(DWORD fontSize);
    {
 	 //设置颜色参数;
-    SET_EDITBACKCOLOR           0x0                    //编辑框背景颜色;
- SET_EDITFONTCOLOR              0x1                    //编辑框字体颜色;
- SET_EDITHIGHLICOLOR            0x2                    //字体高亮颜色;
- SET_EDITDIGITALCOLOR           0x3                    //数字颜色;
- SET_EDITNOTECOLOR              0x4                    //注释颜色;
- SET_EDITLINEBACKGCOLOR         0x5                    //行号背景颜色;
- SET_EDITLINECOLOR              0x6                    //行号颜色;
+    SET_EDITBACKCOLOR           0x0                    //编辑框背景颜色
+    
+ SET_EDITFONTCOLOR              0x1                    //编辑框字体颜色
+ 
+ SET_EDITHIGHLICOLOR            0x2                    //字体高亮颜色
+ 
+ SET_EDITDIGITALCOLOR           0x3                    //数字颜色
+ 
+ SET_EDITNOTECOLOR              0x4                    //注释颜色
+ 
+ SET_EDITLINEBACKGCOLOR         0x5                    //行号背景颜色
+ 
+ SET_EDITLINECOLOR              0x6                    //行号颜色
+ 
 	 BOOL     SetEditColor(DWORD  dwStyle, COLORREF clr);
+	 
    }
 	 //
+	 
 	 /*
+	 
 	 功能：添加高亮过滤文本
+	 
 	 参数：过滤文本 不用区分大小写 以空格分开成多个单词
+	 
 	 样式        "push bool FALSE int"
+	 
 	 返回值：是否添加成功
+	 
 	 */
+	 
 	 BOOL AddEditStr(const char* str);
+	 
