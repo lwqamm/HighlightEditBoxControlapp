@@ -6,16 +6,23 @@
 后来才有了这个
 
 引用也简单就几个函数
+
       //设置编辑框文本
+      
  BOOL     SetEditText(IN  const char* str);
+ 
 	 //清空编辑框文本
+	 
 	 BOOL     ClearEditText();
+	 
 	 BOOL     SetEditFont(HFONT* font);
 
 	 //设置字体大小
+	 
 	 BOOL     SetEditFontSize(DWORD fontSize);
    {
 	 //设置颜色参数;
+	 
     SET_EDITBACKCOLOR           0x0                    //编辑框背景颜色
     
  SET_EDITFONTCOLOR              0x1                    //编辑框字体颜色
