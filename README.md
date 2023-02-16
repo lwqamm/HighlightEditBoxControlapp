@@ -1,5 +1,4 @@
-
-![Image]([https://raw.githubusercontent.com/Gladysid/Images-blog/master/IE-box-pic.png](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png))
+![Image](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png)
 
 重绘EDIT控件接管大部分功能
 
