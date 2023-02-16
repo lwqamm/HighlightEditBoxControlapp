@@ -29,6 +29,7 @@
 #define EDIT1211                    0  
 #define  GET_POS_1                  0x0      //获得鼠标矩形返回指针
 #define  GET_FONT_1                 0x1      //获得鼠标矩形返回指针
+#define  GET_DRAW_RET               0x2      //获得是否正在画文本
 
 //鼠标Roller_滚轮down 
 #define ROLLER_UP                   0x1      //滚轮向上
@@ -54,7 +55,10 @@ void toUpper(char* src)//大写到小写
 	}
 	return; //返回修改后的字符串首地址
 }
-
+//精易模块程序延时，不卡界面
+void LwSleep(DWORD64 s);
+//易语言处理事件
+void myMsg();
 typedef 	struct _MyCEDIT
 {
 	char m_str[MAX_PATH * 2] = { 0 };
@@ -438,6 +442,11 @@ public:
 	BOOL  GetTextModify();
 	//设置编辑框内容修改
 	BOOL  SetTextModify(BOOL ret = TRUE);
+public:
+	//画文本
+	void  OnDrawText(HDC dc, PMyCEDIT sp, DWORD dx);
+	//画行号
+	void  OnDrawLineNum(HDC dc, PMyCEDIT sp, DWORD dx);
 private:
 	//更新字体宽高
 	void CalcLineCharDim();
@@ -445,9 +454,7 @@ private:
 	void  OnDraw();
 	//画旧文本
 	void OnDraw(DWORD iStyle, DWORD usid);
-	void  OnDrawText(HDC dc, PMyCEDIT sp, DWORD dx);
-	//画行号
-	void  OnDrawLineNum(HDC dc, PMyCEDIT sp, DWORD dx);
+
 	//检测是否已经画出
 	BOOL GetDrawText(PDRAWTEXT p);
 
@@ -462,26 +469,30 @@ private:
 	DWORD  m_LineBackgColor = RGB(0xC8, 0xC8, 0xC8);               //行号背景颜色
 	DWORD  m_LineColor = RGB(0x20, 0x90, 0x20);                    //行号颜色
 	DRAWTEXT  m_Draw;                                               //检测是否绘制
+	BOOL  m_DrawRet=FALSE;                                               //检测是否绘制
+	BOOL  m_DrawLock=FALSE;                                               //检测是否绘制
 
 	HDC    m_cacheDC_1 = 0;                                         //行号备份DC
 	DWORD    m_FontSize = 26;                                       //行号宽度
 	HBITMAP m_HEditBmp = 0;                                         //备份BMP位图
 	HIGHEDITARR     m_Highlight;                                    //高亮文本数组
-	LPTSTR m_AppStr[147] = {
-"__asm","enum","__multiple_inheritance","template","auto","__except","__single_inheritance","this","__based",       //10
-"explicit","__virtual_inheritance","thread","bool","extern","mutable","throw","break","false","naked","true",       //11
-"case","__fastcall","namespace","try","catch","__finally","new","__try","__cdecl","float","operator","typedef",     //12
-"char","for","private","typeid","class","friend","protected","typename","const","goto","public","union",            //12
-"const_cast","if","register","unsigned","continue","inline", "reinterpret_cast","using","__declspec",               //10
-"__inline","return","uuid","default","int","short","__uuidof","delete","__int8","signed","virtual","dllexport",     //12
-"__int16","sizeof","void","dllimport","__int32","static","volatile","do","__int64","static_cast","wmain",           //11
-"double","__leave","__stdcall","while","dynamic_cast","long","struct","xalloc","else","main","switch","interface",  //12
-"persistent","_persistent","transient","depend","ondemand","transient","cset","useindex","indexdef","while",        //10
-"wchar_t","volatile","void","ondemand","transient","cset","useindex","indexdef","virtual","dword","hfont","lpcstr", //12
-"hwnd","hinstance","long_ptr","point","bitmap","tchar","dword64","hmodule","hcurcor","LRESULT lresult","nullptr",   //12
-"false","true","uint","long","uint64","long64","longlong","ulonglong","ulong64","ulong","#define","#ifdef",         //12
-"#include","push","pushad","popad","mov","eax"	,"ebx"	,"ecx"	,"edx","esp,"	,"ebp"	,"esi"	,"edi","call"		//14																			   //1
+	LPTSTR m_AppStr[140] = {
+	"int","__asm","enum","__multiple_inheritance","template","auto","__except","__single_inheritance","this","__based",       //10
+	"explicit","__virtual_inheritance","thread","bool","extern","mutable","throw","break","false","naked","true",       //11
+	"case","__fastcall","namespace","try","catch","__finally","new","__try","__cdecl","float","operator","typedef",     //12
+	"char","for","private","typeid","class","friend","protected","typename","const","goto","public","union",            //12
+	"const_cast","if","register","unsigned","continue","inline", "reinterpret_cast","using","__declspec",               //10
+	"__inline","return","uuid","default","short","__uuidof","delete","__int8","signed","virtual","dllexport",     //12
+	"__int16","sizeof","void","dllimport","__int32","static","volatile","do","__int64","static_cast","wmain",           //11
+	"double","__leave","__stdcall","while","dynamic_cast","long","struct","xalloc","else","main","switch","interface",  //12
+	"persistent","_persistent","transient","depend","ondemand","cset","useindex","indexdef","while",        //10
+	"wchar_t","cset","indexdef","dword","hfont","lpcstr", //12
+	"hwnd","hinstance","long_ptr","point","bitmap","tchar","dword64","hmodule","hcurcor","LRESULT lresult","nullptr",   //12
+	"false","uint","long","uint64","long64","longlong","ulonglong","ulong64","ulong","#define","#ifdef",         //12
+	"#include","push","pushad","popad","mov","eax"	,"ebx"	,"ecx"	,"edx","esp"	,"ebp"	,"esi"	,"edi","call","int"		//14																			   //1
 	};
+
+
 private:
 	//操作窗口
 	HWND         m_hWnd = 0;               //操作窗口
@@ -610,6 +621,77 @@ private:
 }MYHWNDARR, * PMYHWNDARR;
 MYHWNDARR aman;
 
+typedef struct _MYOPAIN
+{
+	PWinArr Windows = 0; //操作类基址
+	DWORD         dx = 0;      //操作编号
+	PCEditList    p = 0;       //操作字符串
+	HDC           dc = 0;      //画文本dc
+	HDC           fdc = 0;      //画行号dc
+	DWORD         m_Max = 0;   //最大操作数
+	PDWORD        m_Count = 0; //操作行数
+	PDWORD        m_ret = 0;   //判断线程是否返回
+}MYOPAIN,*PMYOPAIN,*LPMYOPAIN,*NPMYOPAIN;
+
+void EditThreadProc(PMYOPAIN p1)
+{
+	if (!p1->Windows||!p1->dc || !p1->fdc || !p1->m_Max || !p1->m_Count || !p1->m_ret)
+	{
+		*(PDWORD)p1->m_ret = 1;//成功标值;
+		return;
+	}
+	MYOPAIN pptrq;
+	memcpy(&pptrq,p1,sizeof(MYOPAIN));
+	PMYOPAIN p = &pptrq;
+	int m_max = 0;
+	if (p->m_Max - p->dx*30 >=30)
+	{
+		m_max = 30;
+	}
+	else
+	{
+		m_max = p->m_Max - p->dx * 30;
+	}
+	CEditList  m_EDStr;
+	for (size_t i = 0; i < p->p->Getlen(); i++)
+	{
+		m_EDStr.Addm_str(p->p->GetEditStr(i));
+	}
+
+
+	PMyCEDIT pp=0;
+	char t_ch1[30] = { 0 };
+
+	*(PDWORD)p1->m_ret = 1;//成功标值;
+
+	for (int i =p->dx*30; i < p->dx * 30+m_max; i++)
+	{
+		if (i>30)
+		{
+			i = i;
+		}
+		pp= m_EDStr.GetEditStr(i);
+		_itoa(i + 1, t_ch1, 10);
+		MyCEDIT t_editp;
+		if (i + 1 <= 9)
+		{
+			t_editp.m_str[0] = '0';
+			memcpy(t_editp.m_str + 1, t_ch1, strlen(t_ch1));
+			t_editp.m_Strlen = 2;
+		}
+		else
+		{
+			memcpy(t_editp.m_str, t_ch1, strlen(t_ch1));
+			t_editp.m_Strlen = strlen(t_ch1);
+		}
+		p->Windows->Windows->OnDrawLineNum(p->fdc, &t_editp, i);
+	
+		p->Windows->Windows->OnDrawText(p->dc, pp, i);
+		*(DWORD*)(p->m_Count) = *p->m_Count + 1;
+
+	}
+	m_EDStr.Clear();
+}
 //构造函数
 ScintillaWin::ScintillaWin()
 {
@@ -617,6 +699,10 @@ ScintillaWin::ScintillaWin()
 	//m_Highlight
 		for (size_t i = 0; i < sizeof(m_AppStr)/ sizeof(LPTSTR); i++)
 		{
+			if (!m_AppStr[i])
+			{
+				return;
+			}
 			HIGHEDIT pp;
 			memset(&pp,0, sizeof(HIGHEDIT));
 			pp.m_Strlen = strlen(m_AppStr[i]);
@@ -677,6 +763,7 @@ BOOL ScintillaWin::AddEditStr(const char* str)
 	}
 	if (m_Highlight.Getlen()>ret)
 	{
+		OnDraw();
 		return TRUE;
 	}
 	return FALSE;
@@ -857,6 +944,7 @@ void ScintillaWin::SetCaretPos(POINT pt)
 	int nLineHeight = GetLineHeight();int rle = GetTheVisibleCount();
 	CRect rct;
 	::GetClientRect(m_fWnd, rct);
+	HDC pdc = GetDC(m_hWnd);
 	switch (iStyle)
 	{
 	case SW_SHOW://显示
@@ -864,11 +952,8 @@ void ScintillaWin::SetCaretPos(POINT pt)
 		HDC cacheDC = ::CreateCompatibleDC(m_fdc);//内存编辑框dc
 		HBITMAP HEditBmp = CreateCompatibleBitmap(m_fdc, 1, nLineHeight-2); //内存编辑框位图
 		HBITMAP pOHEditmap = (HBITMAP)::SelectObject(cacheDC, HEditBmp);        //内存画编辑框位图
-		CRect rtc1, rtc2;
-		GetWindowRect(m_fWnd, &rtc1);
-		GetWindowRect(m_hWnd, &rtc2);
-		pt.x += abs(rtc2.left - rtc1.left)+1;
-		::BitBlt(m_fdc, pt.x, pt.y, 2, nLineHeight, cacheDC, 0, 0, SRCCOPY);
+
+		::BitBlt(pdc, pt.x, pt.y, 1, nLineHeight-2, cacheDC, 0, 0, SRCCOPY);
 		::SelectObject(cacheDC, pOHEditmap);
 		DeleteObject(HEditBmp);
 		::DeleteDC(cacheDC);
@@ -884,7 +969,7 @@ void ScintillaWin::SetCaretPos(POINT pt)
 		break;
 	}
 	}
-	
+	ReleaseDC(m_hWnd, pdc);
 	return;
 }
 
@@ -996,6 +1081,11 @@ void ScintillaWin::OnDraw(DWORD iStyle, DWORD usid)
 }
 void ScintillaWin::OnDraw()
 {
+	while (m_DrawRet)
+	{
+		Sleep(10);
+	}
+	m_DrawRet = TRUE;
 	CRect rcClient;
 	GetClientRect(&rcClient);//获取编辑框RECT
 	CRect frct;
@@ -1019,6 +1109,7 @@ void ScintillaWin::OnDraw()
 	}
 	else
 	{
+		m_DrawRet = FALSE;
 		return;  //大于100000退出
 	}
 
@@ -1056,41 +1147,107 @@ void ScintillaWin::OnDraw()
 		::SelectObject(cacheDC, m_Font);
 		::SelectObject(m_cacheDC_1, m_Font);
 	}
-	char t_ch1[30] = { 0 };
 
-	for (size_t i = 0; i < nLineCount; i++)
+	MYOPAIN pp;
+	pp.dc = cacheDC;
+	pp.fdc = m_cacheDC_1;
+	pp.m_Count =(PDWORD)&nLineCount;
+	pp.m_Max = nLineCount;
+	pp.p = &m_EDitStr;
+	pp.Windows = aman.GetVae(m_hWnd);
+
+	int n_max = nLineCount % 30;
+	
+	if (nLineCount <= 30)
 	{
-		PMyCEDIT pp = m_EDitStr.GetEditStr(i);
-
-
-		_itoa(i + 1, t_ch1, 10);
-		MyCEDIT t_editp;
-		if (i + 1 <= 9)
+		n_max = 1;
+	}
+	else
+	{
+		if (n_max != 0)
 		{
-			t_editp.m_str[0] = '0';
-			memcpy(t_editp.m_str + 1, t_ch1, strlen(t_ch1));
-			t_editp.m_Strlen = 2;
+			n_max = nLineCount / 30 + 1;
 		}
 		else
 		{
-			memcpy(t_editp.m_str, t_ch1, strlen(t_ch1));
-			t_editp.m_Strlen = strlen(t_ch1);
+			n_max = nLineCount / 30;
 		}
-		OnDrawLineNum(m_cacheDC_1, &t_editp, i);//画行号
-		OnDrawText(cacheDC, pp, i);//画内容
 	}
 
 
-	// 直接在设备DC上绘制
+	DWORD ret = FALSE;
+	pp.m_ret = &ret;
+	nLineCount = 0;
 
+	HANDLE* hadle = new HANDLE[n_max];
+	memset(hadle, 0, sizeof(HANDLE) * n_max);
 
+	if (n_max<= MAXIMUM_WAIT_OBJECTS)
+	{
+		for (size_t i = 0; i < n_max; i++)
+		{
+			ret = FALSE;
+			pp.dx = i;
+			hadle[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)EditThreadProc, &pp, 0, 0);
+			while (ret == FALSE)
+			{
+				//Sleep(1);
+				nLineCount = nLineCount;
+			}
+
+		}
+		WaitForMultipleObjects(n_max, hadle, TRUE, INFINITE);////处理多个线程用这个方法最好
+			// 直接在设备DC上绘制
+		for (size_t i = 0; i < n_max; i++) {CloseHandle(hadle[i]);}
+	}
+	else
+	{
+		for (size_t i = 0; i < n_max; i++)
+		{
+			if (i%MAXIMUM_WAIT_OBJECTS==0 )
+			{
+				WaitForMultipleObjects(n_max, hadle, TRUE, INFINITE);////处理多个线程用这个方法最好
+				for (size_t k = 0; k < n_max; k++)
+				{
+					CloseHandle(hadle[k]);
+				}
+				
+			}
+			if (i==n_max-1)
+			{
+				if (i % MAXIMUM_WAIT_OBJECTS == 0)
+				{
+					WaitForMultipleObjects(n_max, hadle, TRUE, INFINITE);////处理多个线程用这个方法最好
+					for (size_t k = 0; k < n_max; k++)
+					{
+						CloseHandle(hadle[k]);
+					}
+
+				}
+			}
+			ret = FALSE;
+			pp.dx = i;
+			hadle[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)EditThreadProc, &pp, 0, 0);
+			while (ret == FALSE)
+			{
+				//Sleep(1);
+				nLineCount = nLineCount;
+			}
+
+		}
+
+	}
+
+	//MAXIMUM_WAIT_OBJECTS
 	int rle = GetTheVisibleCount();
+	
+	delete[] hadle;//删除线程句柄
+
 	CRect rtc1, rtc2;
 	GetWindowRect(m_fWnd, &rtc1);
 	GetWindowRect(m_hWnd, &rtc2);
 	int ax= abs(rtc2.left - rtc1.left) ;
-	::BitBlt(m_cacheDC_1, ax+4, 0, frct.Width(), frct.Height(), cacheDC, 0, 0, SRCCOPY);
-
+	::BitBlt(m_cacheDC_1, ax, 0, frct.Width(), frct.Height(), cacheDC, 0, 0, SRCCOPY);
 
 	::BitBlt(m_fdc, 0, 0, frct.Width(), frct.Height(), m_cacheDC_1, 0, rle * nLineHeight, SRCCOPY);
 
@@ -1100,6 +1257,7 @@ void ScintillaWin::OnDraw()
 
 
 	ReleaseDC(m_hWnd, pdc);
+	m_DrawRet = FALSE;
 }
 
 //画文本内容 ,着色系统
@@ -1109,6 +1267,11 @@ void ScintillaWin::OnDrawText(HDC dc, PMyCEDIT sp, DWORD dx)
 	{
 		return;
 	}
+	 while (m_DrawLock)//
+	 {
+	 	Sleep(1);
+	 }
+		m_DrawLock = TRUE;
 
 	SetBkMode(dc, 0);
 	BOOL ret = FALSE;
@@ -1394,7 +1557,8 @@ void ScintillaWin::OnDrawText(HDC dc, PMyCEDIT sp, DWORD dx)
 		star++;
 	}
 	ReleaseDC(m_hWnd, dc);
-	//
+	
+	m_DrawLock = FALSE;
 }
 
 void ScintillaWin::OnDrawLineNum(HDC dc, PMyCEDIT p, DWORD dx)
@@ -1441,7 +1605,10 @@ void* ScintillaWin::GetProcP(DWORD dx)
 	{
 		return &m_Font;
 	}
-
+	case GET_DRAW_RET:
+	{
+		return &m_DrawRet;
+	}
 	default:
 		break;
 	}
@@ -1651,7 +1818,12 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
             if (p1)
             {
+				BOOL* bol=(BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
             	//p1->Windows->OnPain();
+				if (*bol)
+				{
+					return FALSE;
+				}
 				POINT po1;
 				::GetCaretPos(&po1);
 					
@@ -1996,4 +2168,37 @@ BOOL Scintilla::AddEditStr(const char* str)
 		return FALSE;
 	}
 	return p->Windows->AddEditStr(str);
+}
+
+
+
+
+
+
+
+void myMsg()
+{
+	MSG m;
+	while (PeekMessage(&m, 0, 0, 0, 1) != 0)
+	{
+		DispatchMessage(&m);
+		TranslateMessage(&m);
+	}
+}
+
+void LwSleep(DWORD64 s)
+{
+	LARGE_INTEGER j_sj;
+	j_sj.QuadPart = -10 * 1000 * s;
+	HANDLE	j_jb = CreateWaitableTimerA(0, FALSE, 0);
+	if (j_jb)
+	{
+		SetWaitableTimer(j_jb, &j_sj, 0, 0, 0, FALSE);
+		while (MsgWaitForMultipleObjects(1, &j_jb, FALSE, -1, 255) != 0)
+		{
+			myMsg();
+		}
+		CloseHandle(j_jb);
+	}
+
 }

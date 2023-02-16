@@ -29,7 +29,7 @@ public:
 #else
 	 BOOL GetEditText(OUT char* p);
 #endif
-
+	 //设置编辑框文本
 	 BOOL     SetEditText(IN  const char* str);
 	 //清空编辑框文本
 	 BOOL     ClearEditText();
