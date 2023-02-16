@@ -1,6 +1,5 @@
-# HighlightEditBoxControlapp
-# QQ截图20230215213315
-https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png
+
+show https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png
 
 重绘EDIT控件接管大部分功能
 
