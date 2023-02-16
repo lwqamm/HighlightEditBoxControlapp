@@ -1,5 +1,6 @@
 # HighlightEditBoxControlapp
 # QQ截图20230215213315
+#https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png
 重绘EDIT控件接管大部分功能
 
 哈哈自己写了自己用的 那个开源插件X86可以高亮X64就不行了！
