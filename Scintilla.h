@@ -18,6 +18,7 @@
 #define SET_EDITNOTECOLOR              0x4                    //注释颜色
 #define SET_EDITLINEBACKGCOLOR         0x5                    //行号背景颜色
 #define SET_EDITLINECOLOR              0x6                    //行号颜色
+#define SET_EDIT_TEXT_SEL              WM_USER+100            //全部选中文本
  class  Scintilla
 {
 
@@ -47,6 +48,11 @@ public:
 	 返回值：是否添加成功
 	 */
 	 BOOL AddEditStr(const char* str);
+	 //更新编辑框窗口
+	 void UpdateEditWindow();
+	 //设置编辑控件提示文本
+	 BOOL SetPromptText(const char* str);
+	 LRESULT SendMessage(UINT msg, WPARAM wParam, LPARAM lParam);
 	 
 private:
 	HWND m_hWnd = 0;     //操作句柄
@@ -57,3 +63,4 @@ private:
 	// TODO: 在此添加您的方法。
 //extern "C" DLLEXPORT_API Scintilla * GetCat();
 
+ extern  BOOL Mybool;//导出给外面用 不然鼠标得不到释放
