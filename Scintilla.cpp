@@ -980,7 +980,7 @@ BOOL ScintillaWin::SetSelPosColor(HDC dc ,DWORD coten,DWORD h)
 					GetStrRect(dc, &rtc, p->m_str, m_SelPos.start - start);
 					GetStrRect(dc, &rtc1, p->m_str+ (m_SelPos.start - start), m_SelPos.end - m_SelPos.start);
 					rtc1.left += rtc.right;
-					rtc1.top = i * rtc1.Height();
+					rtc1.top = i * m_nLineHeight;
 					rtc1.bottom += rtc1.top;
 					rtc1.right += rtc1.left;
 
@@ -991,7 +991,7 @@ BOOL ScintillaWin::SetSelPosColor(HDC dc ,DWORD coten,DWORD h)
 				{
 					GetStrRect(dc, &rtc, p->m_str, p->m_Strlen);
 					rtc.left = 0;
-					rtc.top = i * rtc1.right;
+					rtc.top = i * m_nLineHeight;
 					rtc.bottom += rtc.top;
 					rtc.right += rtc.left;
 					Rectangle(dc, &rtc, m_SelPosColor);
@@ -1003,7 +1003,7 @@ BOOL ScintillaWin::SetSelPosColor(HDC dc ,DWORD coten,DWORD h)
 					GetStrRect(dc, &rtc, p->m_str, m_SelPos.start - start);
 					GetStrRect(dc, &rtc1, p->m_str + (m_SelPos.start - start),p->m_Strlen- (m_SelPos.start - start));
 					rtc1.left = +rtc.right;
-					rtc1.top = i * rtc1.Height();
+					rtc1.top = i * m_nLineHeight;
 					rtc1.bottom += rtc1.top;
 					rtc1.right += rtc1.left;
 
@@ -1017,7 +1017,7 @@ BOOL ScintillaWin::SetSelPosColor(HDC dc ,DWORD coten,DWORD h)
 			{
 				GetStrRect(dc, &rtc1, p->m_str , m_SelPos.end -start);
 				rtc1.left = 0;
-				rtc1.top = i * rtc1.Height();
+				rtc1.top = i * m_nLineHeight;
 				rtc1.bottom += rtc1.top;
 				rtc1.right += rtc1.left;
 
@@ -1115,12 +1115,12 @@ int  ScintillaWin::SetRollTextPos(DWORD  dwStyle, DWORD dx )
 	{
 	case SB_LINEDOWN:
 	{
-		SetRollTextPos_1(SB_LINEDOWN, dx);
+		SetRollTextPos_1(SB_LINEDOWN, 3);
 		break;
 	}
 	case SB_LINEUP:
 	{
-		SetRollTextPos_1(SB_LINEUP, dx);
+		SetRollTextPos_1(SB_LINEUP, 3);
 		break;
 	}
 	case SB_PAGEDOWN:
@@ -1545,8 +1545,6 @@ void ScintillaWin::OnDraw()
 			n_max = nLineCount / 30;
 		}
 	}
-
-
 	DWORD ret = FALSE;
 	pp.m_ret = &ret;
 	nLineCount = 0;
@@ -2122,7 +2120,13 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 	case WM_LBUTTONDOWN:
 	{
-		Mybool = TRUE;
+		PWinArr p1 = aman.GetVae(hWnd);
+		BOOL* bol = (BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
+		//p1->Windows->OnPain(2,0);
+		if (*bol)
+		{
+			return FALSE;
+		}
 		if (g_mct == 0)
 		{
 			g_mct = TRUE;
@@ -2134,10 +2138,16 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		if (g_mct)
 		{
 			PWinArr p1 = aman.GetVae(hWnd);
+			BOOL* bol = (BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
+			//p1->Windows->OnPain(2,0);
+			if (*bol)
+			{
+				return FALSE;
+			}
 			p1->Windows->OnPain(WM_LBUTTONUP,0);
 			g_mct = FALSE;
 		}
-		Mybool = FALSE;
+		
 		break;
 	}
 	case SET_EDIT_TEXT_SEL://全选文本
@@ -2152,6 +2162,12 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		if (wParam == 'A' && ::GetKeyState(VK_CONTROL) < 0)
 		{
 			PWinArr p1 = aman.GetVae(hWnd);
+			BOOL* bol = (BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
+			//p1->Windows->OnPain(2,0);
+			if (*bol)
+			{
+				return FALSE;
+			}
 			p1->Windows->SetTextSelPos(0, 0, 'A');
 			p1->Windows->OnPain(WM_LBUTTONUP, 0);
 			return FALSE;
@@ -2168,6 +2184,14 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		if (g_mct)
 		{
 			PWinArr p1 = aman.GetVae(hWnd);
+			BOOL* bol = (BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
+			//p1->Windows->OnPain(2,0);
+			if (*bol)
+			{
+				return FALSE;
+			}
+
+
 			p1->Windows->OnPain();
 			g_mct = FALSE;
 		}
@@ -2184,6 +2208,13 @@ LRESULT CALLBACK ScintillaWin::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		PWinArr p1 = aman.GetVae(hWnd);
 		if (p1)
 		{
+			PWinArr p1 = aman.GetVae(hWnd);
+			BOOL* bol = (BOOL*)p1->Windows->GetProcP(GET_DRAW_RET);
+			//p1->Windows->OnPain(2,0);
+			if (*bol)
+			{
+				return FALSE;
+			}
 			if (delta > 0)
 			{
 				p1->Windows->OnPain(ROLLER_UP, delta);//鼠标滚轮向上滚动
