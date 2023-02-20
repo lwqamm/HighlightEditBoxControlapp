@@ -1,13 +1,25 @@
+重绘EDIT控件接管大部分功能
+
+哈哈自己写了自己用的 那个开源插件X86可以高亮X64就不行了！
+
+屏蔽了原来的编辑框控件右键 弹出式菜单
+
+屏蔽了双击选择单词功能
+
+屏蔽了原来的选择功能
+
+增加了Ctrl+A 全选功能
+
+设置了行数限制 最大1000行
+
+大于1000行就报错了 不知道为什么
+
 ![Image](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/20230218200000.png)
 ![Image](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/image.png)
 ![Image](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/QQ%E6%88%AA%E5%9B%BE20230215213435.png)
 ![Image](https://github.com/lwqamm/HighlightEditBoxControlapp/blob/main/QQ%E6%88%AA%E5%9B%BE20230215213315.png)
 
-重绘EDIT控件接管大部分功能
 
-哈哈自己写了自己用的 那个开源插件X86可以高亮X64就不行了！
-
-后来才有了这个
 
 引用也简单就几个函数
 
