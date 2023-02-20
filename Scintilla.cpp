@@ -759,6 +759,10 @@ ScintillaWin::~ScintillaWin()
 //设置鼠标选择位置
 BOOL ScintillaWin::SetEditPos(POINT pt, DWORD dwStyle)
 {
+	if (!strlen(m_pTextBuffer))
+	{
+		return FALSE;
+	}
 	int vbs = GetTheVisibleCount();
 
 	DWORD y = vbs * m_nLineHeight;
